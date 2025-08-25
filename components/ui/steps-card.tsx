@@ -1,37 +1,13 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { Text } from './text';
 import { ChevronRight } from 'lucide-react-native';
+import { useHealthData } from '@/hooks/useHealthData';
 
 export function StepsCard() {
-  const stepCount = 3672;
-  const hourlySteps = [
-    0,
-    0,
-    0,
-    0,
-    0,
-    0, // 00-05
-    120,
-    180,
-    250,
-    320,
-    180,
-    290, // 06-11
-    450,
-    380,
-    520,
-    340,
-    280,
-    190, // 12-17
-    420,
-    380,
-    290,
-    180,
-    120,
-    80, // 18-23
-  ];
-  const maxSteps = Math.max(...hourlySteps);
+  const { steps: stepCount, hourlySteps, loading, error } = useHealthData();
+  const maxSteps = Math.max(...(hourlySteps ?? [0]));
+  console.log('log: error', error);
 
   return (
     <View className="w-full rounded-xl bg-[#16171A] p-4">
@@ -42,13 +18,17 @@ export function StepsCard() {
       <View className="-mx-4 mb-3 h-px bg-white/5" />
       <View className="mb-4">
         <Text className="text-sm text-[#B7BBC2]">Сьогодні</Text>
-        <Text className="text-4xl font-light tabular-nums text-[#B399FF]">
-          {stepCount.toLocaleString()}
-        </Text>
+        {loading && !error && <ActivityIndicator size="small" color="#B399FF" />}
+        {error && <Text className="text-sm text-red-400">Нет данных</Text>}
+        {stepCount != null && !error && !loading && (
+          <Text className="text-4xl font-light tabular-nums text-[#B399FF]">
+            {stepCount.toLocaleString()}
+          </Text>
+        )}
       </View>
       <View>
         <View className="h-16 flex-row items-end justify-between gap-1">
-          {hourlySteps.map((steps, index) => {
+          {(hourlySteps ?? Array(24).fill(0)).map((steps, index) => {
             const height = maxSteps > 0 ? (steps / maxSteps) * 100 : 0;
             return (
               <View
@@ -56,7 +36,7 @@ export function StepsCard() {
                 className="relative h-16 flex-1 overflow-hidden rounded-sm bg-[#23232A]">
                 <View
                   className="absolute bottom-0 left-0 right-0 rounded-sm bg-[#B399FF]"
-                  style={{ height: `${height}%` }}
+                  style={{ height: `${height}%`, opacity: hourlySteps ? 1 : 0.25 }}
                 />
               </View>
             );
