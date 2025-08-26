@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, ActivityIndicator, useColorScheme } from 'react-native';
+import { View, ActivityIndicator, useColorScheme, Pressable } from 'react-native';
+import { router } from 'expo-router';
 import { Text } from './text';
 import { ChevronRight } from 'lucide-react-native';
 import { useHealthData } from '@/hooks/useHealthData';
@@ -11,7 +12,10 @@ export function StepsCard() {
   const maxSteps = Math.max(...(hourlySteps ?? [0]));
 
   return (
-    <View className="w-full rounded-xl border border-border bg-card p-4 dark:shadow-none">
+    <Pressable
+      onPress={() => router.push('/steps')}
+      className="w-full rounded-xl border border-border bg-card p-4 dark:shadow-none active:opacity-80"
+    >
       <View className="mb-3 flex-row items-center justify-between pb-2">
         <Text className="text-xl font-extrabold text-card-foreground">Кроки</Text>
         <ChevronRight size={20} color={dark ? '#C4B5FD' : '#7C3AED'} />
@@ -53,6 +57,6 @@ export function StepsCard() {
           ))}
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
