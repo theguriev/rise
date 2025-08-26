@@ -1,4 +1,5 @@
 import AppleHealthKit, { HealthKitPermissions, HealthValue } from 'rn-apple-healthkit';
+import { Platform } from 'react-native';
 
 type StepSample = {
   startDate: string;
@@ -6,20 +7,37 @@ type StepSample = {
   value: number;
 };
 
+// Attempt to use constants if present, otherwise fall back to raw strings
+const HK_ANY: any = AppleHealthKit as any;
+const Perms = HK_ANY?.Constants?.Permissions || {};
+
 const permissions: HealthKitPermissions = {
   permissions: {
-    read: ['StepCount', 'DistanceWalkingRunning', 'ActiveEnergyBurned'],
+    read: [
+      Perms.StepCount || 'StepCount',
+      Perms.DistanceWalkingRunning || 'DistanceWalkingRunning',
+      Perms.ActiveEnergyBurned || 'ActiveEnergyBurned',
+    ],
     write: [],
   },
 };
 
 export function initHealth(): Promise<void> {
   return new Promise((resolve, reject) => {
-    AppleHealthKit.initHealthKit(permissions, (error) => {
-      if (error) {
-        reject(error);
-        return;
-      }
+    if (Platform.OS !== 'ios') {
+      // HealthKit only on iOS – resolve silently
+      return resolve();
+    }
+    const native: any = AppleHealthKit as any;
+    if (!native || typeof native.initHealthKit !== 'function') {
+      return reject(
+        new Error(
+          '[Health] Native module not linked. Rebuild the iOS app with HealthKit capability enabled (expo prebuild / run:ios + add HealthKit capability).'
+        )
+      );
+    }
+    native.initHealthKit(permissions, (error: unknown) => {
+      if (error) return reject(error as any);
       resolve();
     });
   });
@@ -27,8 +45,9 @@ export function initHealth(): Promise<void> {
 
 export async function getTodayStepCount(): Promise<number> {
   return new Promise((resolve, reject) => {
+    if (Platform.OS !== 'ios') return resolve(0);
     const options = { date: new Date().toISOString() };
-    AppleHealthKit.getStepCount(options, (err: string, result: HealthValue) => {
+    (AppleHealthKit as any).getStepCount?.(options, (err: string, result: HealthValue) => {
       if (err || !result) {
         reject(err);
         return;
@@ -40,6 +59,7 @@ export async function getTodayStepCount(): Promise<number> {
 
 export async function getHourlySteps(): Promise<number[]> {
   return new Promise((resolve, reject) => {
+    if (Platform.OS !== 'ios') return resolve(Array(24).fill(0));
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
@@ -76,6 +96,7 @@ export async function getHourlySteps(): Promise<number[]> {
 
 export async function getTodayDistanceKm(): Promise<number> {
   return new Promise((resolve) => {
+    if (Platform.OS !== 'ios') return resolve(0);
     const options = { date: new Date().toISOString() } as any;
     const fn: any = (AppleHealthKit as any).getDistanceWalkingRunning;
     if (!fn) return resolve(0);
@@ -89,6 +110,7 @@ export async function getTodayDistanceKm(): Promise<number> {
 
 export async function getTodayActiveEnergyKcal(): Promise<number> {
   return new Promise((resolve) => {
+    if (Platform.OS !== 'ios') return resolve(0);
     const options = { date: new Date().toISOString() } as any;
     const fn: any = (AppleHealthKit as any).getActiveEnergyBurned;
     if (!fn) return resolve(0);
@@ -101,6 +123,7 @@ export async function getTodayActiveEnergyKcal(): Promise<number> {
 
 export async function getHourlyDistanceKm(): Promise<number[]> {
   return new Promise((resolve) => {
+    if (Platform.OS !== 'ios') return resolve(Array(24).fill(0));
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
@@ -130,6 +153,7 @@ export async function getHourlyDistanceKm(): Promise<number[]> {
 
 export async function getHourlyActiveEnergyKcal(): Promise<number[]> {
   return new Promise((resolve) => {
+    if (Platform.OS !== 'ios') return resolve(Array(24).fill(0));
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);

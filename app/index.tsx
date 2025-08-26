@@ -2,13 +2,11 @@ import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { THEME } from '@/lib/theme';
 import { format } from 'date-fns';
-import { Stack } from 'expo-router';
+import { BlurView } from 'expo-blur';
 import { MoonStarIcon, SunIcon } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
 import * as React from 'react';
-import { BlurView } from 'expo-blur';
-import { Animated } from 'react-native';
-import { Text, View } from 'react-native';
+import { Animated, Text, View } from 'react-native';
 import { StepsCard } from '../components/ui/steps-card';
 
 const THEME_ICONS = {
