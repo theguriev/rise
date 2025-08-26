@@ -14,8 +14,7 @@ export function StepsCard() {
   return (
     <Pressable
       onPress={() => router.push('/steps')}
-      className="w-full rounded-xl border border-border bg-card p-4 dark:shadow-none active:opacity-80"
-    >
+      className="w-full rounded-xl border border-border bg-card p-4 active:opacity-80 dark:shadow-none">
       <View className="mb-3 flex-row items-center justify-between pb-2">
         <Text className="text-xl font-extrabold text-card-foreground">Кроки</Text>
         <ChevronRight size={20} color={dark ? '#C4B5FD' : '#7C3AED'} />
