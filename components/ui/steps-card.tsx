@@ -7,7 +7,6 @@ import { useHealthData } from '@/hooks/useHealthData';
 export function StepsCard() {
   const { steps: stepCount, hourlySteps, loading, error } = useHealthData();
   const maxSteps = Math.max(...(hourlySteps ?? [0]));
-  console.log('log: error', error);
 
   return (
     <View className="w-full rounded-xl bg-[#16171A] p-4">

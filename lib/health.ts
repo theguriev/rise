@@ -4,9 +4,9 @@ import { Platform } from 'react-native';
 const { AppleHealthKit } = require('react-native').NativeModules;
 
 type StepSample = {
-  startDate: string;
-  endDate: string;
-  value: number;
+  start: string;
+  end: string;
+  quantity: number;
 };
 
 // Build permission list using constants when available
@@ -67,7 +67,7 @@ export async function getHourlySteps(): Promise<number[]> {
     const now = new Date();
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
-    const fn: any = (AppleHealthKit as any).getSamples;
+    const fn: any = AppleHealthKit.getSamples;
     if (!fn) return resolve(Array(24).fill(0));
     fn(
       {
@@ -80,8 +80,8 @@ export async function getHourlySteps(): Promise<number[]> {
       (_err: string, samples: StepSample[]) => {
         const hours = Array(24).fill(0);
         (samples || []).forEach((s) => {
-          const hour = new Date(s.startDate).getHours();
-          hours[hour] += s.value;
+          const hour = new Date(s.start).getHours();
+          hours[hour] += s.quantity;
         });
         resolve(hours);
       }
